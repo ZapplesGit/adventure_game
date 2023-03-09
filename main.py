@@ -32,15 +32,36 @@ hunger = 10
 health_bar = "n/a"
 hunger_bar = "n/a"
 combinable = "n/a"
-
+item1 = "n/a"
+item2 = "n/a"
+'''
 inventory_items = {
-    "rock": "Found it in the sand... Combine with Stick to make hatchet!",
-    "mre": "Meal Ready to Eat. Should fill you up.",
-    "god item": "for testing"
+}'''
+
+gather_items = {
+    "stick": "Combine this with a rock to make a hatchet, or with a bone to make a spear!",
+    "rock": "Found it in the sand... Combine with a stick to make hatchet!",
+    "aloe vera": "Plenty of it to be found around the island. Combines with Marigold to make a health mix..",
+    "marigold": "Beautiful orange flower. Keep it as a memento, or combine it with Aloe Vera to make a health mix.",
+    "mysterious key 1": "I wonder where this leads to...",
+    "mysterious key 2": "I wonder where this leads to...",
+    "blade": "Combine this with a spear to upgrade it.",
+    "lucky charm": "Will give you extra luck during a fight!",
+    "bone": "Combine this with a stick to make a spear!",
+    "vodka": "Drink up... Or combine with cloth to make a Molotov!",
+    "cloth": "Combine with Vodka to make a Molotov!",
+    "grenade": "Will blow up just about anything in a fight.",
+    "rope": "Combine this with a bone to make Bone Armour!"
 }
 
+inventory_items = {
+    "mre": "Meal Ready to Eat. Should fill you up.",
+    "stick": "Combine this with a rock to make a hatchet, or with ____ to ____!",
+    "rock": "Found it in the sand... Combine with a stick to make hatchet!",
+}
 
-
+#for testing
+inventory_items = gather_items
 
 # inventory_items.update({"example": "example"})
 
@@ -58,9 +79,8 @@ def start_game():
         except ValueError:
             print("Please enter an integer!")
     print(f"Proceeding with difficulty {difficulty}!")
-    #time.sleep(1)
     print("You wake up in a foreign land... (SAMPLE INTRODUCTION SEQUENCE)")
-    #time.sleep(1)
+    time.sleep(1)
     next_action()
 
 
@@ -101,27 +121,27 @@ def inventory():
 
     next_action()
 
-def combinable_items():
-    global combinable
-    if item1 or item2 == "rock" and item1 or item2 == "mre":
-        combinable = "true"
-        inventory_items.update({"rocky mre": "Not sure if you would want to eat this..."})
-        del inventory_items["rock"]
-        del inventory_items["mre"]
 
-
-
-
+def combinable_items(craft1, craft2):
+    if craft1 == "rock" or craft2 == "rock":
+        if craft1 == "stick" or craft2 == "stick":
+            check = "true"
+            inventory_items.update({"hatchet": "Could hit some bad guys with this..."})
+            del inventory_items["rock"]
+            del inventory_items["stick"]
+        else:
+            check = "false"
     else:
-        combinable = "false"
+        check = "false"
+
+    return check
+
+
 
 def crafting():
-    global item1
-    global item2
     print("Type an item to use in crafting!")
     print(*inventory_items, sep=", ")
     print("Type X to exit.")
-
     while True:
         item1 = input("\n> ").lower()
         if item1 == "x":
@@ -133,13 +153,11 @@ def crafting():
                 break
             elif item2 in inventory_items:
                 if item2 != item1:
-                    combinable_items()
+                    combinable = combinable_items(item1, item2)
                     if combinable == "true":
                         print(f"Combining {item1} and {item2}...")
-                        #time.sleep(1)
+                        time.sleep(1)
                         print(f"Great success! You made a {list(inventory_items)[-1]}.")
-
-
                     else:
                         print("These items do not combine!")
                 else:
@@ -154,8 +172,32 @@ def crafting():
 
 def survival():
     print("You contemplate your options...")
-    print("H - Hunting \nG - Gathering \nS - SOMETHING")
+    print("H - Hunting \nG - Gathering \nC - Construction")
     print("Type X to exit.")
+
+    while True:
+        global inventory_items
+        action = input("\n> ")
+        if action == "x":
+            next_action()
+            break
+        elif action == "h":
+            print("hunting")
+            break
+        elif action == "g":
+            print("You venture into the woods...")
+            time.sleep(1)
+            randomevent = random.randint(0,12)
+            print(randomevent)
+            print(list(gather_items)[randomevent])
+            inventory_items.update(list(gather_items)[randomevent])
+            print(f"added{list(inventory_items)[-1]}")
+            break
+        elif action == "c":
+            print("construction")
+        else:
+            print("Please enter a valid choice!")
+    next_action()
 
 def next_action():
     get_health()
@@ -167,31 +209,27 @@ def next_action():
     print("Type an item to use it!")
 
     while True:
-        try:
-            action = str(input("\n> ").lower())
-            if action == "i":
-                inventory()
+        action = str(input("\n> ").lower())
+        if action == "i":
+            inventory()
+            break
+        elif action == "c":
+            crafting()
+            break
+        elif action == "e":
+            print("Placeholder exploration screen")
+            break
+        elif action == "s":
+            survival()
+        elif action in inventory_items:
+            print(f"Are you sure you want to use {action}? Y/N")
+            action2 = input("\n> ").lower()
+            if action2 == "y":
+                #use item
                 break
-            elif action == "c":
-                crafting()
-                break
-            elif action == "e":
-                print("Placeholder exploration screen")
-                break
-            elif action == "s":
-                survival()
-            elif action in inventory_items:
-                print(f"Are you sure you want to use {action}? Y/N")
-                action2 = input("\n> ").lower()
-                if action2 == "y":
-                    #use item
-                    break
+        else:
+            print("Please select a valid choice!")
 
-
-            else:
-                print("Please select a valid choice!")
-        except ValueError:
-            print("Please enter a string!")
 
 start_game()
 
