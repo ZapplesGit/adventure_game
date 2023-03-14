@@ -24,19 +24,12 @@ on a deserted island, facing challenges such as loneliness, fear, and despair.
 
 
 
-difficulty = 0
 day = 1
 health = 10
 hunger = 10
 # action = "n/a"
-health_bar = "n/a"
-hunger_bar = "n/a"
-combinable = "n/a"
-item1 = "n/a"
-item2 = "n/a"
-'''
-inventory_items = {
-}'''
+
+
 
 gather_items = {
     "stick": "Combine this with a rock to make a hatchet, or with a bone to make a spear!",
@@ -61,7 +54,7 @@ inventory_items = {
 }
 
 #for testing
-inventory_items = gather_items
+# inventory_items = gather_items
 
 # inventory_items.update({"example": "example"})
 
@@ -79,26 +72,26 @@ def start_game():
         except ValueError:
             print("Please enter an integer!")
     print(f"Proceeding with difficulty {difficulty}!")
-    print("You wake up in a foreign land... (SAMPLE INTRODUCTION SEQUENCE)")
+    print("You wake up in a foreign land...")
     time.sleep(1)
     next_action()
 
 
 def get_health():
     #♥♡
-    global health_bar
-    health_bar = ("♥"*health + "♡"*(10-health))
+    health_return = ("♥"*health + "♡"*(10-health))
+    return health_return
 
 
 def get_hunger():
     #🍲✕
-    global hunger_bar
-    hunger_bar = ("🍲"*hunger + "✕"*(10-hunger))
+    hunger_return = ("🍲"*hunger + "✕"*(10-hunger))
+    return hunger_return
 
 
 def inventory():
-    get_health()
-    get_hunger()
+    health_bar = get_health()
+    hunger_bar = get_hunger()
     print(health_bar)
     print(hunger_bar)
 
@@ -182,16 +175,29 @@ def survival():
             next_action()
             break
         elif action == "h":
-            print("hunting")
+            print("You venture into the woods...")
+            time.sleep(1)
+            randomevent = random.randint(0,3)
+            print(randomevent)
+            if randomevent == 4:
+                print("fight")
+            else:
+                randomevent = random.randint(0,9)
+                print(randomevent)
+
+
+
             break
         elif action == "g":
             print("You venture into the woods...")
             time.sleep(1)
-            randomevent = random.randint(0,12)
-            print(randomevent)
-            print(list(gather_items)[randomevent])
-            inventory_items.update(list(gather_items)[randomevent])
-            print(f"added{list(inventory_items)[-1]}")
+            while True:
+                randomevent = random.randint(0,12)
+                if list(gather_items)[randomevent] not in inventory_items:
+                    inventory_items.update({list(gather_items)[randomevent]: gather_items.get(list(gather_items)[randomevent])})
+                    print(f"You found a {list(inventory_items)[-1]}!")
+                    time.sleep(1)
+                    break
             break
         elif action == "c":
             print("construction")
@@ -200,8 +206,9 @@ def survival():
     next_action()
 
 def next_action():
-    get_health()
-    get_hunger()
+    print(difficulty)
+    health_bar = get_health()
+    hunger_bar = get_hunger()
     print(f"Day {day}")
     print(health_bar)
     print(hunger_bar)
