@@ -1,22 +1,23 @@
-"""var1 = 69
-var2 = 69
+"""
+var1 = 4
+var2 = 4
+var3 = 5
 
 
 def funct(num1, num2):
     if num1 == num2:
-        output = "Great success!"
+        output = "These numbers are equal!"
     else:
-        output = "No success :("
+        output = "These numbers are not equal!"
     return output
 
 
 final = funct(var1, var2)
 
-
 print(final)
 
-print(funct(var1, var2))
-
+print(funct(var1, var3))
+"""
 
 hunger = 5
 
@@ -30,7 +31,7 @@ def get_hunger():
 h = get_hunger()
 
 print(f"final hunger {h}")
-"""
+
 
 # Python3 program to
 # demonstrate instantiating

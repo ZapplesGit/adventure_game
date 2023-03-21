@@ -1,9 +1,6 @@
 # Outsider's Odyssey - The Island
 
-import random
-import time
-
-'''
+"""
 Brief:
 "Outsider's Odyssey - The Island": The player is an outsider who finds themselves stranded on a deserted island inhabited
 by a mysterious and isolated tribe. The tribe is distrustful of outsiders and has their own customs and traditions, making
@@ -18,15 +15,15 @@ to respect their customs or challenge them in order to achieve their objectives.
 affecting the tribe's perception of them and ultimately determining their fate.
 
 Additionally, the player must contend with the limited resources available on the island, managing their inventory and crafting
-tools and weapons in order to survive and progress. The player must also deal with the psychological toll of being stranded
-on a deserted island, facing challenges such as loneliness, fear, and despair.
-'''
+tools and weapons in order to survive and progress.
+"""
 
+import random
+import time
 
 day = 1
 health = 10
-hunger = 5
-
+hunger = 10
 
 gather_items = {
     "stick": "Combine this with a rock to make a hatchet, or with a bone to make a spear!",
@@ -40,24 +37,16 @@ gather_items = {
     "bone": "Combine this with a stick to make a spear!",
     "vodka": "Drink up... Or combine with cloth to make a Molotov!",
     "cloth": "Combine with Vodka to make a Molotov!",
-    "grenade": "Will blow up just about anything in a fight.",
-    "rope": "Combine this with a bone to make Bone Armour!"
+    "grenade": "Will blow up just about anything in a fight."
 }
 
 inventory_items = {
     "mre": "Meal Ready to Eat. Should fill you up.",
     "stick": "Combine this with a rock to make a hatchet, or with a bone to make a spear!",
-    "rock": "Found it in the sand... Combine with a stick to make hatchet!",
-   #  "squirrel meat": "For testing"
+    "rock": "Found it in the sand... Combine with a stick to make hatchet!"
 }
 
 monster_types = ["Zombie", "Orc", "Goblin", "Dragon", "Troll", "Giant"]
-
-
-#for testing
-# inventory_items = gather_items
-
-# inventory_items.update({"example": "example"})
 
 
 def start_game():
@@ -79,15 +68,19 @@ def start_game():
 
 
 def get_health():
+    # ♥♡
     global health
-    #♥♡
+    if health > 10:
+        health = 10
     health_return = ("♥"*health + "♡"*(10-health))
     return health_return
 
 
 def get_hunger():
+    # 🍲✕
     global hunger
-    #🍲✕
+    if hunger > 10:
+        hunger = 10
     hunger_return = ("🍲"*hunger + "✕"*(10-hunger))
     return hunger_return
 
@@ -123,15 +116,6 @@ def combinable_items(craft1, craft2):
         else:
             check = False
 
-    elif craft1 == "bone" or craft2 == "bone":
-        if craft1 == "rope" or craft2 == "rope":
-            check = True
-            inventory_items.update({"bone armour": "Use this to gain back full health!"})
-            del inventory_items["bone"]
-            del inventory_items["rope"]
-        else:
-            check = False
-
     elif craft1 == "aloe vera" or craft2 == "aloe vera":
         if craft1 == "marigold" or craft2 == "marigold":
             check = True
@@ -141,8 +125,8 @@ def combinable_items(craft1, craft2):
         else:
             check = False
 
-    elif craft1 == "bone" or craft2 == "bone":
-        if craft1 == "stick" or craft2 == "stick":
+    elif craft1 == "stick" or craft2 == "stick":
+        if craft1 == "bone" or craft2 == "bone":
             check = True
             inventory_items.update({"spear": "Could stab some bad guys with this..."})
             del inventory_items["bone"]
@@ -252,18 +236,13 @@ def fight():
             else:
                 print("You don't have this item!")
 
-
         monster_damage = random.randint(1, monster_strength)
         health = health - monster_damage
         monster_health = monster_health - attacking_power
 
         print(get_health())
-
         print(f"You deal {attacking_power} damage!")
-
-
         print(f"The {monster} deals {monster_damage} damage!")
-
         print(f"You have {health} health. The {monster} has {monster_health} health.")
 
         if health < 1:
@@ -272,8 +251,6 @@ def fight():
         if monster_health < 1:
             print("monster die")
             fight_over = True
-
-
 
     print("\nFight sequence work in progress!")
 
@@ -286,14 +263,11 @@ def exploration():
 def survival():
     print("You contemplate your options...")
     print("H - Hunting \nG - Gathering")
-    print("Type X to exit.")
+    # print("Type X to exit.")
 
     while True:
         action = input("\n> ")
-        if action == "x":
-            next_action()
-            break
-        elif action == "h":
+        if action == "h":
             print("You venture into the woods...")
             time.sleep(1)
             randomevent = random.randint(0, 3)
@@ -322,7 +296,7 @@ def survival():
             print("You venture into the woods...")
             time.sleep(1)
             while True:
-                randomevent = random.randint(0, 12)
+                randomevent = random.randint(0, 11)
                 if list(gather_items)[randomevent] not in inventory_items:
                     inventory_items.update({list(gather_items)[randomevent]: gather_items.get(list(gather_items)[randomevent])})
                     print(f"You found a {list(inventory_items)[-1]}!")
@@ -335,6 +309,9 @@ def survival():
 
 
 def next_action():
+    global day
+    global hunger
+    global health
     health_bar = get_health()
     hunger_bar = get_hunger()
     print(f"Day {day}")
@@ -352,23 +329,49 @@ def next_action():
             crafting()
             break
         elif action == "e":
+            day += 1
+            hunger -= 1
             exploration()
             break
         elif action == "s":
+            day += 1
+            hunger -= 1
             survival()
         elif action in inventory_items:
             print(f"Are you sure you want to use {action}? Y/N")
             action2 = input("\n> ").lower()
             if action2 == "y":
-                """
-                if action == "squirrel meat":
 
-                    hunger_bar = get_hunger()
+                if action == "squirrel meat":
+                    print("Consuming squirrel meat...")
+                    time.sleep(1)
+                    hunger += 2
                     del inventory_items["squirrel meat"]
                     next_action()
+
+                if action == "duck meat":
+                    print("Consuming duck meat...")
+                    time.sleep(1)
+                    hunger += 2
+                    del inventory_items["squirrel meat"]
+                    next_action()
+
+                if action == "deer meat":
+                    print("Consuming deer meat...")
+                    time.sleep(1)
+                    hunger += 10
+                    del inventory_items["squirrel meat"]
+                    next_action()
+
+                if action == "health mix":
+                    print("Consuming mix...")
+                    time.sleep(1)
+                    health += 10
+                    del inventory_items["health mix"]
+                    next_action()
+
                 else:
                     print("not squirrel meat")
-                """
         else:
             print("Please select a valid choice!")
 
