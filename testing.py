@@ -17,7 +17,7 @@ final = funct(var1, var2)
 print(final)
 
 print(funct(var1, var3))
-"""
+
 
 hunger = 5
 
@@ -59,3 +59,9 @@ Rodger = Dog()
 # and method through objects
 print(Rodger.attr1)
 Rodger.fun()
+"""
+
+
+# Replacing "if" statements
+
+

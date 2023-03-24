@@ -2,28 +2,29 @@
 
 """
 Brief:
-"Outsider's Odyssey - The Island": The player is an outsider who finds themselves stranded on a deserted island inhabited
-by a mysterious and isolated tribe. The tribe is distrustful of outsiders and has their own customs and traditions, making
-it difficult for the player to communicate and form relationships with them.
+"Outsider's Odyssey - The Island": The player wakes up, finding themselves stranded on a desert island inhabited by a
+mysterious and isolated tribe. The tribe is distrustful of outsiders, and the main progression of the game should be
+for the protagonist to uncover the secrets of the tribe, and why how they can escape the island.
 
-The player must learn to survive on the island, hunting and gathering for food and resources, while also avoiding dangerous
-predators and natural hazards. As the player explores the island, they will uncover clues and puzzles that reveal the tribe's
-history and secrets, ultimately leading to a confrontation with the tribe's leadership.
-
-The player must navigate complex moral dilemmas and make difficult choices as they interact with the tribe, deciding whether
-to respect their customs or challenge them in order to achieve their objectives. The player's actions will have consequences,
-affecting the tribe's perception of them and ultimately determining their fate.
+The player must learn to survive on the island, hunting and gathering for food and resources, while also avoiding
+dangerous predators / monsters, and natural hazards. As the player explores the island and progresses the story, they will
+uncover clues and puzzles tha reveal the tribe's secrets, ultimately leading to a confrontation with the tribe's
+leadership.
 
 Additionally, the player must contend with the limited resources available on the island, managing their inventory and crafting
 tools and weapons in order to survive and progress.
 """
+
+# Import libraries and starting variables
 
 import random
 import time
 
 day = 1
 health = 10
-hunger = 10
+hunger = 5
+
+# Starting dictionaries and lists
 
 gather_items = {
     "stick": "Combine this with a rock to make a hatchet, or with a bone to make a spear!",
@@ -46,10 +47,19 @@ inventory_items = {
     "rock": "Found it in the sand... Combine with a stick to make hatchet!"
 }
 
+weapon_power = {
+    "hatchet": 10,
+    "spear": 15,
+    "upgraded spear": 20,
+    "molotov": 35,
+    "grenade": 50
+}
+
+
 monster_types = ["Zombie", "Orc", "Goblin", "Dragon", "Troll", "Giant"]
 
 
-def start_game():
+def start_game():  # Choose difficulty function - difficulty not yet implemented
     print("\nWelcome to Outsider's Odyssey - The Island")
     print("Please select a difficulty level of 1-3")
     while True:
@@ -67,7 +77,7 @@ def start_game():
     next_action()
 
 
-def get_health():
+def get_health():  # Displays health bar
     # ♥♡
     global health
     if health > 10:
@@ -76,7 +86,7 @@ def get_health():
     return health_return
 
 
-def get_hunger():
+def get_hunger():  # Displays hunger bar
     # 🍲✕
     global hunger
     if hunger > 10:
@@ -85,7 +95,7 @@ def get_hunger():
     return hunger_return
 
 
-def inventory():
+def inventory():  # Displays items in inventory
     health_bar = get_health()
     hunger_bar = get_hunger()
     print(health_bar)
@@ -106,7 +116,7 @@ def inventory():
     next_action()
 
 
-def combinable_items(craft1, craft2):
+def combinable_items(craft1, craft2):  # Checks if items are combinable / craftable
     if craft1 == "rock" or craft2 == "rock":
         if craft1 == "stick" or craft2 == "stick":
             check = True
@@ -158,7 +168,7 @@ def combinable_items(craft1, craft2):
     return check
 
 
-def crafting():
+def crafting():  # Uses the combinable function to add new item in inventory from the two old items
     print("Type an item to use in crafting!")
     print(*inventory_items, sep=", ")
     print("Type X to exit.")
@@ -190,12 +200,12 @@ def crafting():
     next_action()
 
 
-def fight():
+def fight():  # The main function for fights
     global health
     print(get_health())
     monster = monster_types[random.randint(0, 5)]
-    monster_health = random.randint(50, 100)
-    monster_strength = random.randint(3, 5)
+    monster_health = random.randint(20, 50)
+    monster_strength = random.randint(2, 4)
     fight_over = False
     print(f"Fighting a {monster}!")
     print(f"health {monster_health} strength {monster_strength}")
@@ -207,7 +217,16 @@ def fight():
     while not fight_over:
         while True:
             action = input("\n> ")
+
             if action in inventory_items:
+
+                """attacking_power = weapon_power[action]
+
+                if action in ["grenade", "health mix"]:
+                    del inventory_items[action]
+
+                break"""  # Currently working on this
+
                 if action == "hatchet":
                     attacking_power = 10
                     break
@@ -246,7 +265,8 @@ def fight():
         print(f"You have {health} health. The {monster} has {monster_health} health.")
 
         if health < 1:
-            print("you die")
+            print("Uh oh... You died!")
+            quit()
             fight_over = True
         if monster_health < 1:
             print("monster die")
@@ -254,13 +274,15 @@ def fight():
 
     print("\nFight sequence work in progress!")
 
+    next_action()
 
-def exploration():
+
+def exploration():  # Should eventually contain the main storyline, however it currently only runs a fight
     fight()
     pass
 
 
-def survival():
+def survival():  # Options for item gathering
     print("You contemplate your options...")
     print("H - Hunting \nG - Gathering")
     # print("Type X to exit.")
@@ -270,10 +292,9 @@ def survival():
         if action == "h":
             print("You venture into the woods...")
             time.sleep(1)
-            randomevent = random.randint(0, 3)
-            print(randomevent)
-            if randomevent == 3:
-                print("fight")
+            randomevent = random.randint(0, 4)
+            if randomevent == 4:
+                print("You are ambushed by a monster!")
                 fight()
                 break
             else:
@@ -308,13 +329,16 @@ def survival():
     next_action()
 
 
-def next_action():
+def next_action():  # Main function
     global day
     global hunger
     global health
     health_bar = get_health()
     hunger_bar = get_hunger()
-    print(f"Day {day}")
+    if hunger < 1:
+        print("\nYou starved to death!")
+        quit()
+    print(f"\nDay {day}")
     print(health_bar)
     print(hunger_bar)
     print("I - Inventory \nC - Crafting \nE - Exploration \nS - Survival")
@@ -353,25 +377,32 @@ def next_action():
                     print("Consuming duck meat...")
                     time.sleep(1)
                     hunger += 2
-                    del inventory_items["squirrel meat"]
+                    del inventory_items["duck meat"]
                     next_action()
 
                 if action == "deer meat":
                     print("Consuming deer meat...")
                     time.sleep(1)
                     hunger += 10
-                    del inventory_items["squirrel meat"]
+                    del inventory_items["deer meat"]
                     next_action()
 
                 if action == "health mix":
-                    print("Consuming mix...")
+                    print("Consuming health mix...")
                     time.sleep(1)
                     health += 10
                     del inventory_items["health mix"]
                     next_action()
 
+                if action == "mre":
+                    print("Consuming MRE...")
+                    time.sleep(1)
+                    hunger += 5
+                    del inventory_items["mre"]
+                    next_action()
+
                 else:
-                    print("not squirrel meat")
+                    print("Item not found!")
         else:
             print("Please select a valid choice!")
 
