@@ -38,11 +38,12 @@ gather_items = {
     "bone": "Combine this with a stick to make a spear!",
     "vodka": "Drink up... Or combine with cloth to make a Molotov!",
     "cloth": "Combine with Vodka to make a Molotov!",
-    "grenade": "Will blow up just about anything in a fight."
+    "grenade": "Will blow up just about anything in a fight. Single use, will deal 50 damage.",
+    "bandage": "Will give +5 health."
 }
 
 inventory_items = {
-    "mre": "Meal Ready to Eat. Should fill you up.",
+    "mre": "Meal Ready to Eat. Should fill you up. +5 hunger.",
     "stick": "Combine this with a rock to make a hatchet, or with a bone to make a spear!",
     "rock": "Found it in the sand... Combine with a stick to make hatchet!"
 }
@@ -88,35 +89,36 @@ def get_health():  # Displays health bar
 
 def get_hunger():  # Displays hunger bar
     # 🍲✕
+    # 🍗
     global hunger
     if hunger > 10:
         hunger = 10
-    hunger_return = ("🍲"*hunger + "✕"*(10-hunger))
+    hunger_return = ("🍗"*hunger + "✕"*(10-hunger))
     return hunger_return
 
 
 def inventory():  # Displays items in inventory
     health_bar = get_health()
     hunger_bar = get_hunger()
-    print(health_bar)
-    print(hunger_bar)
-
-    print(*inventory_items, sep=", ")
-    print("Type an item to learn more. Type X to exit.")
 
     while True:
+        print("\n"+health_bar)
+        print(hunger_bar)
+        print(*inventory_items, sep=", ")
+        print("Type an item to learn more. To use an item, type X to exit.")
         action = input("\n> ").lower()
         if action == "x":
             break
         elif action in inventory_items:
             print(inventory_items[action])
+            time.sleep(1)
         else:
             print("Invalid input.")
 
     next_action()
 
 
-def combinable_items(craft1, craft2):  # Checks if items are combinable / craftable
+def combinable_items(craft1, craft2):  # Checks if items are combinable / craft-able
     if craft1 == "rock" or craft2 == "rock":
         if craft1 == "stick" or craft2 == "stick":
             check = True
@@ -138,7 +140,7 @@ def combinable_items(craft1, craft2):  # Checks if items are combinable / crafta
     elif craft1 == "stick" or craft2 == "stick":
         if craft1 == "bone" or craft2 == "bone":
             check = True
-            inventory_items.update({"spear": "Could stab some bad guys with this..."})
+            inventory_items.update({"spear": "Could stab some bad guys with this... Will deal 15 damage."})
             del inventory_items["bone"]
             del inventory_items["stick"]
         else:
@@ -147,7 +149,7 @@ def combinable_items(craft1, craft2):  # Checks if items are combinable / crafta
     elif craft1 == "spear" or craft2 == "spear":
         if craft1 == "blade" or craft2 == "blade":
             check = True
-            inventory_items.update({"upgraded spear": "Could seriously stab some bad guys with this..."})
+            inventory_items.update({"upgraded spear": "Could seriously stab some bad guys with this... Will deal 20 damage."})
             del inventory_items["spear"]
             del inventory_items["blade"]
         else:
@@ -156,7 +158,7 @@ def combinable_items(craft1, craft2):  # Checks if items are combinable / crafta
     elif craft1 == "cloth" or craft2 == "cloth":
         if craft1 == "vodka" or craft2 == "vodka":
             check = True
-            inventory_items.update({"molotov": "Could burn up some bad guys with this..."})
+            inventory_items.update({"molotov": "Could burn up some bad guys with this... Single use, will deal 35 damage."})
             del inventory_items["cloth"]
             del inventory_items["vodka"]
         else:
@@ -169,10 +171,10 @@ def combinable_items(craft1, craft2):  # Checks if items are combinable / crafta
 
 
 def crafting():  # Uses the combinable function to add new item in inventory from the two old items
-    print("Type an item to use in crafting!")
-    print(*inventory_items, sep=", ")
-    print("Type X to exit.")
     while True:
+        print("\nType an item to use in crafting!")
+        print(*inventory_items, sep=", ")
+        print("Type X to exit.")
         item1 = input("\n> ").lower()
         if item1 == "x":
             break
@@ -188,6 +190,7 @@ def crafting():  # Uses the combinable function to add new item in inventory fro
                         print(f"Combining {item1} and {item2}...")
                         time.sleep(1)
                         print(f"Great success! You made a {list(inventory_items)[-1]}.")
+                        time.sleep(1)
                     else:
                         print("These items do not combine!")
                 else:
@@ -247,6 +250,9 @@ def fight():  # The main function for fights
                 elif action == "health mix":
                     health = 10
                     del inventory_items["health mix"]
+                elif action == "bandage":
+                    health += 5
+                    del inventory_items["bandage"]
                 else:
                     print("You cannot use this item!")
             elif action == "hands":
@@ -278,6 +284,7 @@ def fight():  # The main function for fights
 
 
 def exploration():  # Should eventually contain the main storyline, however it currently only runs a fight
+    
     fight()
     pass
 
@@ -302,22 +309,21 @@ def survival():  # Options for item gathering
                 print(randomevent)
                 if -1 < randomevent < 4:
                     print("Your hunting efforts weren't fortunate... You found a dead squirrel.")
-                    inventory_items.update({"squirrel meat": "🍲🍲 hunger!"})
+                    inventory_items.update({"squirrel meat": "+2 hunger!"})
                 elif 3 < randomevent < 8:
                     print("You manage to ambush a group of ducks")
 
-                    inventory_items.update({"duck meat": "🍲🍲🍲🍲🍲 hunger!"})
+                    inventory_items.update({"duck meat": "+5 hunger!"})
                 else:
                     print("You took down a deer!")
-                    inventory_items.update({"deer meat": "🍲🍲🍲🍲🍲🍲🍲🍲🍲🍲 hunger!"})
-
+                    inventory_items.update({"deer meat": "Fully restores hunger when consumed!"})
             break
 
         elif action == "g":
             print("You venture into the woods...")
             time.sleep(1)
             while True:
-                randomevent = random.randint(0, 11)
+                randomevent = random.randint(0, 12)
                 if list(gather_items)[randomevent] not in inventory_items:
                     inventory_items.update({list(gather_items)[randomevent]: gather_items.get(list(gather_items)[randomevent])})
                     print(f"You found a {list(inventory_items)[-1]}!")
@@ -335,36 +341,38 @@ def next_action():  # Main function
     global health
     health_bar = get_health()
     hunger_bar = get_hunger()
-    if hunger < 1:
+    if hunger <= 0:
         print("\nYou starved to death!")
         quit()
+    if hunger <= 4:
+        print("You're getting hungry...")
     print(f"\nDay {day}")
     print(health_bar)
     print(hunger_bar)
     print("I - Inventory \nC - Crafting \nE - Exploration \nS - Survival")
-    print("Type an item to use it!")
+    print("Or, type an item to use it!")
 
     while True:
         action = str(input("\n> ").lower())
-        if action == "i":
+        if action == "i" or action == "inventory":
             inventory()
             break
-        elif action == "c":
+        elif action == "c" or action == "craft" or action == "crafting":
             crafting()
             break
-        elif action == "e":
+        elif action == "e" or action == "explore" or action == "exploration":
             day += 1
             hunger -= 1
             exploration()
             break
-        elif action == "s":
+        elif action == "s" or action == "survival" or action == "survive":
             day += 1
             hunger -= 1
             survival()
         elif action in inventory_items:
             print(f"Are you sure you want to use {action}? Y/N")
             action2 = input("\n> ").lower()
-            if action2 == "y":
+            if action2 == "y" or "yes":
 
                 if action == "squirrel meat":
                     print("Consuming squirrel meat...")
@@ -376,7 +384,7 @@ def next_action():  # Main function
                 if action == "duck meat":
                     print("Consuming duck meat...")
                     time.sleep(1)
-                    hunger += 2
+                    hunger += 5
                     del inventory_items["duck meat"]
                     next_action()
 
@@ -392,6 +400,13 @@ def next_action():  # Main function
                     time.sleep(1)
                     health += 10
                     del inventory_items["health mix"]
+                    next_action()
+
+                if action == "bandage":
+                    print("Using bandage...")
+                    time.sleep(1)
+                    health += 5
+                    del inventory_items["bandage"]
                     next_action()
 
                 if action == "mre":
