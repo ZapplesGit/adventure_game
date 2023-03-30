@@ -23,6 +23,7 @@ import time
 day = 1
 health = 10
 hunger = 5
+level = 1
 
 # Starting dictionaries and lists
 
@@ -56,8 +57,15 @@ weapon_power = {
     "grenade": 50
 }
 
+healing_power = {
+    "health mix": 10,
+    "bandage": 5
+}
 
 monster_types = ["Zombie", "Orc", "Goblin", "Dragon", "Troll", "Giant"]
+
+# (for testing)
+# inventory_items = gather_items
 
 
 def start_game():  # Choose difficulty function - difficulty not yet implemented
@@ -205,19 +213,62 @@ def crafting():  # Uses the combinable function to add new item in inventory fro
 
 def fight():  # The main function for fights
     global health
+    global level
     print(get_health())
     monster = monster_types[random.randint(0, 5)]
     monster_health = random.randint(20, 50)
     monster_strength = random.randint(2, 4)
+
+    if level == 1:
+        monster = "Wolf"
+        monster_health = 25
+        monster_strength = 1
+
+    if level == 2:
+        monster = "Tribesman"
+        monster_health = 30
+        monster_strength = 2
+
+    if level == 3:
+        monster = "Bear"
+        monster_health = 35
+        monster_strength = 2
+
+    if level == 4:
+        monster = "Rival Tribesman"
+        monster_health = 40
+        monster_strength = 2
+
+    if level == 5:
+        monster = "Rival Tribe Chief"
+        monster_health = 45
+        monster_strength = 3
+
+    if level == 6:
+        monster = "Giant"
+        monster_health = 50
+        monster_strength = 3
+
+    if level == 7:
+        monster = "Tribesman warrior"
+        monster_health = 55
+        monster_strength = 3
+
+    if level == 8:
+        monster = "The Chief"
+        monster_health = 70
+        monster_strength = 4
+
     fight_over = False
-    print(f"Fighting a {monster}!")
-    print(f"health {monster_health} strength {monster_strength}")
-    print(f"Your health is {health}")
-    print("\nInventory:")
-    print(*inventory_items, sep=", ")
-    print("\nType an item to attack with or use! Type \"hands\" to attack with your bare hands!")
+
+    print(f"You're fighting a {monster}!")
+    print(f"It has {monster_health} health, and {monster_strength} strength!")
 
     while not fight_over:
+        print("\nInventory:")
+        # print(*inventory_items, sep=", ")
+        print(*[element for element in inventory_items if element in weapon_power or element in healing_power], sep=", ")
+        print("\nType an item to attack with or use! Type \"hands\" to attack with your bare hands!")
         while True:
             action = input("\n> ")
 
@@ -268,7 +319,7 @@ def fight():  # The main function for fights
         print(get_health())
         print(f"You deal {attacking_power} damage!")
         print(f"The {monster} deals {monster_damage} damage!")
-        print(f"You have {health} health. The {monster} has {monster_health} health.")
+        print(f"The {monster} has {monster_health} health.")
 
         if health < 1:
             print("Uh oh... You died!")
@@ -278,15 +329,78 @@ def fight():  # The main function for fights
             print("monster die")
             fight_over = True
 
-    print("\nFight sequence work in progress!")
-
+    print("\nYou won the fight!")
+    level += 1
+    time.sleep(1)
     next_action()
 
 
 def exploration():  # Should eventually contain the main storyline, however it currently only runs a fight
-    
-    fight()
+    global level
+    if level == 1:
+        print("\nDisoriented, you pace away from the beach and into the woods.")
+        print("You hear distant noises, and are suddenly ambushed by a wolf!")
+        print("If you kill the wolf, you may have a meal for tonight, if you run, you may go hungry.\n")
+        time.sleep(1)
+        fight()
     pass
+
+    if level == 2:
+        print("\nAfter that encounter with the wolf, you're shaken, but you continue into the woods.")
+        print("You stumble upon a native tribe who lives on the island.")
+        print("They attack! Fend the tribesman off!\n")
+        time.sleep(1)
+        fight()
+    pass
+
+    if level == 3:
+        print("\nAfter that encounter with the tribe, you're shaken, but you continue into the woods.")
+        print("You encounter the tribe again, but it seems that you have gained their respect")
+        print("They tell you they will help you off this island, but you must prove yourself by killing a bear.\n")
+        time.sleep(1)
+        fight()
+    pass
+
+    if level == 4:
+        print("\nYou've gained the trust of the tribe, but you hear a sound in the distance.")
+        print("It's another rival tribe! They seek to kill you and your allies")
+        print("Fend them off!")
+        time.sleep(1)
+        fight()
+    pass
+
+    if level == 5:
+        print("\nThe rival tribe is back!")
+        print("After seeing your skill in battle, the Chief of the tribe wishes to battle!")
+        print("You are cornered! Defeat the rival Chief!")
+        time.sleep(1)
+        fight()
+    pass
+
+    if level == 6:
+        print("\nWith the rival chief defeated, your tribe rules over the island!")
+        print("You hear a noise while you're out collecting firewood...")
+        print("It's a giant! Defeat it, before it destroys the tribe!")
+        time.sleep(1)
+        fight()
+    pass
+
+    if level == 7:
+        print("\nYou think you can rest easy now that the giant is defeated...")
+        print("While you're resting, you hear the chief of your tribe plotting to kill you!")
+        print("You act fast, and attack his henchmen!")
+        time.sleep(1)
+        fight()
+    pass
+
+    if level == 8:
+        print("\nYou have defeated his henchman, but the Chief is angry...")
+        print("He charges at you... Defeat him to escape The Island!")
+        time.sleep(1)
+        fight()
+
+    if level > 8:
+        fight()
 
 
 def survival():  # Options for item gathering
@@ -299,18 +413,18 @@ def survival():  # Options for item gathering
         if action == "h":
             print("You venture into the woods...")
             time.sleep(1)
-            randomevent = random.randint(0, 4)
-            if randomevent == 4:
+            event = random.randint(0, 4)
+            if event == 4:
                 print("You are ambushed by a monster!")
                 fight()
                 break
             else:
-                randomevent = random.randint(0, 10)
-                print(randomevent)
-                if -1 < randomevent < 4:
+                event = random.randint(0, 10)
+                print(event)
+                if -1 < event < 4:
                     print("Your hunting efforts weren't fortunate... You found a dead squirrel.")
                     inventory_items.update({"squirrel meat": "+2 hunger!"})
-                elif 3 < randomevent < 8:
+                elif 3 < event < 8:
                     print("You manage to ambush a group of ducks")
 
                     inventory_items.update({"duck meat": "+5 hunger!"})
@@ -323,9 +437,9 @@ def survival():  # Options for item gathering
             print("You venture into the woods...")
             time.sleep(1)
             while True:
-                randomevent = random.randint(0, 12)
-                if list(gather_items)[randomevent] not in inventory_items:
-                    inventory_items.update({list(gather_items)[randomevent]: gather_items.get(list(gather_items)[randomevent])})
+                event = random.randint(0, 12)
+                if list(gather_items)[event] not in inventory_items:
+                    inventory_items.update({list(gather_items)[event]: gather_items.get(list(gather_items)[event])})
                     print(f"You found a {list(inventory_items)[-1]}!")
                     time.sleep(1)
                     break
