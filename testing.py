@@ -59,9 +59,48 @@ Rodger = Dog()
 # and method through objects
 print(Rodger.attr1)
 Rodger.fun()
-"""
 
 
 # Replacing "if" statements
 
+level = 1
+
+for i in range(1,6):
+
+    levels = {
+        1: ["Wolf", 25, 1],
+        2: ["Tribesman", 30, 2],
+        3: ["Bear", 35, 2],
+        4: ["Rival Tribesman", 40, 2],
+        5: ["Rival Tribe Chief", 45, 3],
+        6: ["Giant", 50, 3]
+    }
+
+    monster = levels[level][0]
+    monster_health = levels[level][1]
+    monster_strength = levels[level][2]
+
+    print(level)
+    print(monster)
+    print(monster_health)
+    print(monster_strength)
+
+    level += 1
+"""
+# Outsider's Odyssey - The Island
+
+"""
+Brief:
+"Outsider's Odyssey - The Island": The player wakes up, finding themselves stranded on a desert island inhabited by a
+mysterious and isolated tribe. The tribe is distrustful of outsiders, and the main progression of the game should be
+for the protagonist to uncover the secrets of the tribe, and why how they can escape the island.
+
+The player must learn to survive on the island, hunting and gathering for food and resources, while also avoiding
+dangerous predators / monsters, and natural hazards. As the player explores the island and progresses the story, they will
+uncover clues and puzzles that reveal the tribe's secrets, ultimately leading to a confrontation with the tribe's
+leadership.
+
+Additionally, the player must contend with the limited resources available on the island, managing their inventory and crafting
+tools and weapons in order to survive and progress.
+"""
 

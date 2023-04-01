@@ -8,7 +8,7 @@ for the protagonist to uncover the secrets of the tribe, and why how they can es
 
 The player must learn to survive on the island, hunting and gathering for food and resources, while also avoiding
 dangerous predators / monsters, and natural hazards. As the player explores the island and progresses the story, they will
-uncover clues and puzzles tha reveal the tribe's secrets, ultimately leading to a confrontation with the tribe's
+uncover clues and puzzles that reveal the tribe's secrets, ultimately leading to a confrontation with the tribe's
 leadership.
 
 Additionally, the player must contend with the limited resources available on the island, managing their inventory and crafting
@@ -32,10 +32,7 @@ gather_items = {
     "rock": "Found it in the sand... Combine with a stick to make hatchet!",
     "aloe vera": "Plenty of it to be found around the island. Combines with Marigold to make a health mix..",
     "marigold": "Beautiful orange flower. Keep it as a memento, or combine it with Aloe Vera to make a health mix.",
-    "mysterious key 1": "I wonder where this leads to...",
-    "mysterious key 2": "I wonder where this leads to...",
     "blade": "Combine this with a spear to upgrade it.",
-    "lucky charm": "Will give you extra luck during a fight!",
     "bone": "Combine this with a stick to make a spear!",
     "vodka": "Drink up... Or combine with cloth to make a Molotov!",
     "cloth": "Combine with Vodka to make a Molotov!",
@@ -127,51 +124,21 @@ def inventory():  # Displays items in inventory
 
 
 def combinable_items(craft1, craft2):  # Checks if items are combinable / craft-able
-    if craft1 == "rock" or craft2 == "rock":
-        if craft1 == "stick" or craft2 == "stick":
-            check = True
-            inventory_items.update({"hatchet": "Could hit some bad guys with this..."})
-            del inventory_items["rock"]
-            del inventory_items["stick"]
-        else:
-            check = False
 
-    elif craft1 == "aloe vera" or craft2 == "aloe vera":
-        if craft1 == "marigold" or craft2 == "marigold":
-            check = True
-            inventory_items.update({"health mix": "Max out your health with this!"})
-            del inventory_items["aloe vera"]
-            del inventory_items["marigold"]
-        else:
-            check = False
+    combinations = {
+        ("rock", "stick"): {"result": "hatchet", "description": "Could hit some bad guys with this..."},
+        ("aloe vera", "marigold"): {"result": "health mix", "description": "Max out your health with this!"},
+        ("stick", "bone"): {"result": "spear", "description": "Could stab some bad guys with this... Will deal 15 damage."},
+        ("spear", "blade"): {"result": "upgraded spear", "description": "Could seriously stab some bad guys with this... Will deal 20 damage."},
+        ("cloth", "vodka"): {"result": "molotov", "description": "Could burn up some bad guys with this... Single use, will deal 35 damage."}
+        }
 
-    elif craft1 == "stick" or craft2 == "stick":
-        if craft1 == "bone" or craft2 == "bone":
-            check = True
-            inventory_items.update({"spear": "Could stab some bad guys with this... Will deal 15 damage."})
-            del inventory_items["bone"]
-            del inventory_items["stick"]
-        else:
-            check = False
-
-    elif craft1 == "spear" or craft2 == "spear":
-        if craft1 == "blade" or craft2 == "blade":
-            check = True
-            inventory_items.update({"upgraded spear": "Could seriously stab some bad guys with this... Will deal 20 damage."})
-            del inventory_items["spear"]
-            del inventory_items["blade"]
-        else:
-            check = False
-
-    elif craft1 == "cloth" or craft2 == "cloth":
-        if craft1 == "vodka" or craft2 == "vodka":
-            check = True
-            inventory_items.update({"molotov": "Could burn up some bad guys with this... Single use, will deal 35 damage."})
-            del inventory_items["cloth"]
-            del inventory_items["vodka"]
-        else:
-            check = False
-
+    if (craft1, craft2) in combinations or (craft2, craft1) in combinations:
+        check = True
+        outcome = combinations.get((craft1, craft2)) or combinations.get((craft2, craft1))
+        inventory_items.update({outcome["result"]: outcome["description"]})
+        del inventory_items[craft1]
+        del inventory_items[craft2]
     else:
         check = False
 
@@ -214,101 +181,55 @@ def crafting():  # Uses the combinable function to add new item in inventory fro
 def fight():  # The main function for fights
     global health
     global level
-    print(get_health())
     monster = monster_types[random.randint(0, 5)]
     monster_health = random.randint(20, 50)
     monster_strength = random.randint(2, 4)
 
-    if level == 1:
-        monster = "Wolf"
-        monster_health = 25
-        monster_strength = 1
+    levels = {
+        1: ["Wolf", 25, 1],
+        2: ["Tribesman", 30, 2],
+        3: ["Bear", 35, 2],
+        4: ["Rival Tribesman", 40, 2],
+        5: ["Rival Tribe Chief", 45, 3],
+        6: ["Giant", 50, 3],
+        7: ["Tribe Henchman", 55, 4],
+        8: ["The Chief", 100, 4]
+    }
 
-    if level == 2:
-        monster = "Tribesman"
-        monster_health = 30
-        monster_strength = 2
-
-    if level == 3:
-        monster = "Bear"
-        monster_health = 35
-        monster_strength = 2
-
-    if level == 4:
-        monster = "Rival Tribesman"
-        monster_health = 40
-        monster_strength = 2
-
-    if level == 5:
-        monster = "Rival Tribe Chief"
-        monster_health = 45
-        monster_strength = 3
-
-    if level == 6:
-        monster = "Giant"
-        monster_health = 50
-        monster_strength = 3
-
-    if level == 7:
-        monster = "Tribesman warrior"
-        monster_health = 55
-        monster_strength = 3
-
-    if level == 8:
-        monster = "The Chief"
-        monster_health = 70
-        monster_strength = 4
+    if level < 9:
+        monster = levels[level][0]
+        monster_health = levels[level][1]
+        monster_strength = levels[level][2]
 
     fight_over = False
 
+    print(get_health())
     print(f"You're fighting a {monster}!")
     print(f"It has {monster_health} health, and {monster_strength} strength!")
 
     while not fight_over:
-        print("\nInventory:")
-        # print(*inventory_items, sep=", ")
-        print(*[element for element in inventory_items if element in weapon_power or element in healing_power], sep=", ")
-        print("\nType an item to attack with or use! Type \"hands\" to attack with your bare hands!")
         while True:
+            print("\nInventory:")
+            # print(*inventory_items, sep=", ")
+            print(*[element for element in inventory_items if element in weapon_power or element in healing_power], sep=", ")
+            print("\nType an item to attack with or use! Type \"hands\" to attack with your bare hands!")
+
             action = input("\n> ")
 
-            if action in inventory_items:
-
-                """attacking_power = weapon_power[action]
-
-                if action in ["grenade", "health mix"]:
-                    del inventory_items[action]
-
-                break"""  # Currently working on this
-
-                if action == "hatchet":
-                    attacking_power = 10
-                    break
-                elif action == "spear":
-                    attacking_power = 15
-                    break
-                elif action == "upgraded spear":
-                    attacking_power = 20
-                    break
-                elif action == "molotov":
-                    attacking_power = 35
-                    del inventory_items["molotov"]
-                    break
-                elif action == "grenade":
-                    attacking_power = 50
-                    del inventory_items["grenade"]
-                    break
-                elif action == "health mix":
-                    health = 10
-                    del inventory_items["health mix"]
-                elif action == "bandage":
-                    health += 5
-                    del inventory_items["bandage"]
-                else:
-                    print("You cannot use this item!")
-            elif action == "hands":
+            if action == "hands":
                 attacking_power = 5
                 break
+            if action in inventory_items:
+                if action in ["grenade", "molotov", "bandage", "health mix"]:
+                    del inventory_items[action]
+                if action in healing_power:
+                    health += healing_power[action]
+                    print(get_health())
+                elif action in weapon_power:
+                    attacking_power = weapon_power[action]
+                    break
+                else:
+                    print("You can't use this item!")
             else:
                 print("You don't have this item!")
 
@@ -316,88 +237,47 @@ def fight():  # The main function for fights
         health = health - monster_damage
         monster_health = monster_health - attacking_power
 
+        if monster_health < 0:
+            monster_health = 0
+
         print(get_health())
         print(f"You deal {attacking_power} damage!")
         print(f"The {monster} deals {monster_damage} damage!")
         print(f"The {monster} has {monster_health} health.")
 
-        if health < 1:
-            print("Uh oh... You died!")
-            quit()
-            fight_over = True
-        if monster_health < 1:
-            print("monster die")
+        if health < 1 or monster_health < 1:
             fight_over = True
 
-    print("\nYou won the fight!")
-    level += 1
-    time.sleep(1)
-    next_action()
+    if health > 0:
+        print("\nYou won the fight!")
+        level += 1
+        time.sleep(1)
+        next_action()
+
+    else:
+        print("\nUh oh... You lost the fight!")
+        health = 3
+        time.sleep(1)
+        next_action()
 
 
 def exploration():  # Should eventually contain the main storyline, however it currently only runs a fight
     global level
-    if level == 1:
-        print("\nDisoriented, you pace away from the beach and into the woods.")
-        print("You hear distant noises, and are suddenly ambushed by a wolf!")
-        print("If you kill the wolf, you may have a meal for tonight, if you run, you may go hungry.\n")
-        time.sleep(1)
-        fight()
-    pass
 
-    if level == 2:
-        print("\nAfter that encounter with the wolf, you're shaken, but you continue into the woods.")
-        print("You stumble upon a native tribe who lives on the island.")
-        print("They attack! Fend the tribesman off!\n")
-        time.sleep(1)
-        fight()
-    pass
+    levels = {
+        1: "\nDisoriented, you pace away from the beach and into the woods.\nYou hear distant noises, and are suddenly ambushed by a wolf!\nIf you kill the wolf, you may have a meal for tonight, if you run, you may go hungry.\n",
+        2: "\nAfter that encounter with the wolf, you're shaken, but you continue into the woods.\nYou stumble upon a native tribe who lives on the island.\nThey attack! Fend the tribesman off!\n",
+        3: "\nAfter that encounter with the tribe, you're shaken, but you continue into the woods.\nYou encounter the tribe again, but it seems that you have gained their respect\nThey tell you they will help you off this island, but you must prove yourself by killing a bear.\n",
+        4: "\nYou've gained the trust of the tribe, but you hear a sound in the distance.\nIt's another rival tribe! They seek to kill you and your allies\nFend them off!\n",
+        5: "\nThe rival tribe is back!\nAfter seeing your skill in battle, the Chief of the tribe wishes to battle!\nYou are cornered! Defeat the rival Chief!\n",
+        6: "\nWith the rival chief defeated, your tribe rules over the island!\nYou hear a noise while you're out collecting firewood...\nIt's a giant! Defeat it, before it destroys the tribe!\n",
+        7: "\nYou think you can rest easy now that the giant is defeated...\nWhile you're resting, you hear the chief of your tribe plotting to kill you!\nYou act fast, and attack his henchmen!\n",
+        8: "\nYou have defeated his henchman, but the Chief is angry...\nHe charges at you... Defeat him to escape The Island!\n"
+    }
 
-    if level == 3:
-        print("\nAfter that encounter with the tribe, you're shaken, but you continue into the woods.")
-        print("You encounter the tribe again, but it seems that you have gained their respect")
-        print("They tell you they will help you off this island, but you must prove yourself by killing a bear.\n")
-        time.sleep(1)
-        fight()
-    pass
-
-    if level == 4:
-        print("\nYou've gained the trust of the tribe, but you hear a sound in the distance.")
-        print("It's another rival tribe! They seek to kill you and your allies")
-        print("Fend them off!")
-        time.sleep(1)
-        fight()
-    pass
-
-    if level == 5:
-        print("\nThe rival tribe is back!")
-        print("After seeing your skill in battle, the Chief of the tribe wishes to battle!")
-        print("You are cornered! Defeat the rival Chief!")
-        time.sleep(1)
-        fight()
-    pass
-
-    if level == 6:
-        print("\nWith the rival chief defeated, your tribe rules over the island!")
-        print("You hear a noise while you're out collecting firewood...")
-        print("It's a giant! Defeat it, before it destroys the tribe!")
-        time.sleep(1)
-        fight()
-    pass
-
-    if level == 7:
-        print("\nYou think you can rest easy now that the giant is defeated...")
-        print("While you're resting, you hear the chief of your tribe plotting to kill you!")
-        print("You act fast, and attack his henchmen!")
-        time.sleep(1)
-        fight()
-    pass
-
-    if level == 8:
-        print("\nYou have defeated his henchman, but the Chief is angry...")
-        print("He charges at you... Defeat him to escape The Island!")
-        time.sleep(1)
-        fight()
+    print(levels[level])
+    time.sleep(1)
+    fight()
 
     if level > 8:
         fight()
@@ -413,21 +293,20 @@ def survival():  # Options for item gathering
         if action == "h":
             print("You venture into the woods...")
             time.sleep(1)
-            event = random.randint(0, 4)
-            if event == 4:
+            event = random.randint(0, 9)
+            if event == 5:
                 print("You are ambushed by a monster!")
                 fight()
                 break
             else:
                 event = random.randint(0, 10)
-                print(event)
                 if -1 < event < 4:
                     print("Your hunting efforts weren't fortunate... You found a dead squirrel.")
-                    inventory_items.update({"squirrel meat": "+2 hunger!"})
+                    inventory_items.update({"squirrel meat": "Will give you +2 hunger when consumed!!"})
                 elif 3 < event < 8:
                     print("You manage to ambush a group of ducks")
 
-                    inventory_items.update({"duck meat": "+5 hunger!"})
+                    inventory_items.update({"duck meat": "Will give you +5 hunger when consumed!"})
                 else:
                     print("You took down a deer!")
                     inventory_items.update({"deer meat": "Fully restores hunger when consumed!"})
@@ -437,7 +316,7 @@ def survival():  # Options for item gathering
             print("You venture into the woods...")
             time.sleep(1)
             while True:
-                event = random.randint(0, 12)
+                event = random.randint(0, 9)
                 if list(gather_items)[event] not in inventory_items:
                     inventory_items.update({list(gather_items)[event]: gather_items.get(list(gather_items)[event])})
                     print(f"You found a {list(inventory_items)[-1]}!")
@@ -459,7 +338,7 @@ def next_action():  # Main function
         print("\nYou starved to death!")
         quit()
     if hunger <= 4:
-        print("You're getting hungry...")
+        print("\nYou're getting hungry...")
     print(f"\nDay {day}")
     print(health_bar)
     print(hunger_bar)
