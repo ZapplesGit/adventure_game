@@ -1,3 +1,5 @@
+import random
+
 """
 var1 = 4
 var2 = 4
@@ -87,20 +89,34 @@ for i in range(1,6):
 
     level += 1
 """
-# Outsider's Odyssey - The Island
 
-"""
-Brief:
-"Outsider's Odyssey - The Island": The player wakes up, finding themselves stranded on a desert island inhabited by a
-mysterious and isolated tribe. The tribe is distrustful of outsiders, and the main progression of the game should be
-for the protagonist to uncover the secrets of the tribe, and why how they can escape the island.
+inventory_items = {
+    "mre": {"description": "Meal Ready to Eat. Should fill you up. Will give +5 hunger when consumed.", "count": 1},
+    "stick": {"description": "Combine this with a rock to make a hatchet, or with a bone to make a spear!", "count": 1},
+    "rock": {"description": "Found it in the sand... Combine with a stick to make hatchet!", "count": 1}
+}
 
-The player must learn to survive on the island, hunting and gathering for food and resources, while also avoiding
-dangerous predators / monsters, and natural hazards. As the player explores the island and progresses the story, they will
-uncover clues and puzzles that reveal the tribe's secrets, ultimately leading to a confrontation with the tribe's
-leadership.
+gather_items = {
+    "stick": {"description": "Combine this with a rock to make a hatchet, or with a bone to make a spear!", "count": 1},
+    "rock": {"description": "Found it in the sand... Combine with a stick to make hatchet!", "count": 1},
+    "balls": {"description": "ball!", "count": 1}
+}
 
-Additionally, the player must contend with the limited resources available on the island, managing their inventory and crafting
-tools and weapons in order to survive and progress.
-"""
 
+# print(inventory_items["mre"]["count"])
+
+event = random.randint(0,2)
+
+if list(gather_items)[event] not in inventory_items:
+    print("ADDING ITEM")
+    inventory_items.update({list(gather_items)[event]: gather_items.get(list(gather_items)[event])})
+else:
+    print("ADDING NUM")
+    inventory_items[list(gather_items)[event]]["count"] += 1
+    # This should add to the number of a specific item
+
+
+print(f"You found a {list(gather_items)[event]}!")
+
+for item in inventory_items:
+    print(f"{item}: {inventory_items[item]['count']} - {inventory_items[item]['description']} ")

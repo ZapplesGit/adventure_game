@@ -15,6 +15,12 @@ Additionally, the player must contend with the limited resources available on th
 tools and weapons in order to survive and progress.
 """
 
+# CURRENT KNOWN BUGS
+# Gathering when you have every item breaks the game
+# There is no current way to distinguishing how many items you have
+# Can't currently heal in the main menu
+#
+
 # Import libraries and starting variables
 
 import random
@@ -25,25 +31,42 @@ health = 10
 hunger = 5
 level = 1
 
+# Constants
+
+NUM_LEVELS = 8
+MAX_HUNGER = 10
+MAX_HEALTH = 10
+
+FIGHT_LOSS_HEALTH = 3
+ODDS_AMBUSH = 9
+
+BANDAGE_HEALING = 5
+HEALTH_MIX_HEALING = 10
+
+SQUIRREL_MEAT_FOOD = 2
+DUCK_MEAT_FOOD = 5
+DEER_MEAT_FOOD = 10
+MRE_FOOD = 5
+
 # Starting dictionaries and lists
 
 gather_items = {
-    "stick": "Combine this with a rock to make a hatchet, or with a bone to make a spear!",
-    "rock": "Found it in the sand... Combine with a stick to make hatchet!",
-    "aloe vera": "Plenty of it to be found around the island. Combines with Marigold to make a health mix..",
-    "marigold": "Beautiful orange flower. Keep it as a memento, or combine it with Aloe Vera to make a health mix.",
-    "blade": "Combine this with a spear to upgrade it.",
-    "bone": "Combine this with a stick to make a spear!",
-    "vodka": "Drink up... Or combine with cloth to make a Molotov!",
-    "cloth": "Combine with Vodka to make a Molotov!",
-    "grenade": "Will blow up just about anything in a fight. Single use, will deal 50 damage.",
-    "bandage": "Will give +5 health."
+    "stick": {"description": "Combine this with a rock to make a hatchet, or with a bone to make a spear!", "count": 1},
+    "rock": {"description": "Found it in the sand... Combine with a stick to make hatchet!", "count": 1},
+    "aloe vera": {"description": "Plenty of it to be found around the island. Combines with Marigold to make a health mix..", "count": 1},
+    "marigold": {"description": "Beautiful orange flower. Keep it as a memento, or combine it with Aloe Vera to make a health mix.", "count": 1},
+    "blade": {"description": "Combine this with a spear to upgrade it.", "count": 1},
+    "bone": {"description": "Combine this with a stick to make a spear!", "count": 1},
+    "vodka": {"description": "Drink up... Or combine with cloth to make a Molotov!", "count": 1},
+    "cloth": {"description": "Combine with Vodka to make a Molotov!", "count": 1},
+    "grenade": {"description": "Will blow up just about anything in a fight. Single use, will deal 50 damage.", "count": 1},
+    "bandage": {"description": "Will give +5 health when used.", "count": 1}
 }
 
 inventory_items = {
-    "mre": "Meal Ready to Eat. Should fill you up. +5 hunger.",
-    "stick": "Combine this with a rock to make a hatchet, or with a bone to make a spear!",
-    "rock": "Found it in the sand... Combine with a stick to make hatchet!"
+    "mre": {"description": "Meal Ready to Eat. Should fill you up. Will give +5 hunger when consumed.", "count": 1},
+    "stick": {"description": "Combine this with a rock to make a hatchet, or with a bone to make a spear!", "count": 1},
+    "rock": {"description": "Found it in the sand... Combine with a stick to make hatchet!", "count": 1}
 }
 
 weapon_power = {
@@ -57,6 +80,13 @@ weapon_power = {
 healing_power = {
     "health mix": 10,
     "bandage": 5
+}
+
+hunger_power = {
+    "squirrel meat": SQUIRREL_MEAT_FOOD,
+    "duck meat": DUCK_MEAT_FOOD,
+    "deer meat": DEER_MEAT_FOOD,
+    "mre": MRE_FOOD
 }
 
 monster_types = ["Zombie", "Orc", "Goblin", "Dragon", "Troll", "Giant"]
@@ -86,9 +116,9 @@ def start_game():  # Choose difficulty function - difficulty not yet implemented
 def get_health():  # Displays health bar
     # ♥♡
     global health
-    if health > 10:
-        health = 10
-    health_return = ("♥"*health + "♡"*(10-health))
+    if health > MAX_HEALTH:
+        health = MAX_HEALTH
+    health_return = ("♥"*health + "♡"*(MAX_HEALTH-health))
     return health_return
 
 
@@ -96,9 +126,9 @@ def get_hunger():  # Displays hunger bar
     # 🍲✕
     # 🍗
     global hunger
-    if hunger > 10:
-        hunger = 10
-    hunger_return = ("🍗"*hunger + "✕"*(10-hunger))
+    if hunger > MAX_HUNGER:
+        hunger = MAX_HUNGER
+    hunger_return = ("🍗"*hunger + "✕"*(MAX_HUNGER-hunger))
     return hunger_return
 
 
@@ -110,6 +140,10 @@ def inventory():  # Displays items in inventory
         print("\n"+health_bar)
         print(hunger_bar)
         print(*inventory_items, sep=", ")
+
+        for item in inventory_items:
+            print(f"{item}: {inventory_items[item]['count']}")
+
         print("Type an item to learn more. To use an item, type X to exit.")
         action = input("\n> ").lower()
         if action == "x":
@@ -131,7 +165,7 @@ def combinable_items(craft1, craft2):  # Checks if items are combinable / craft-
         ("stick", "bone"): {"result": "spear", "description": "Could stab some bad guys with this... Will deal 15 damage."},
         ("spear", "blade"): {"result": "upgraded spear", "description": "Could seriously stab some bad guys with this... Will deal 20 damage."},
         ("cloth", "vodka"): {"result": "molotov", "description": "Could burn up some bad guys with this... Single use, will deal 35 damage."}
-        }
+    }
 
     if (craft1, craft2) in combinations or (craft2, craft1) in combinations:
         check = True
@@ -196,7 +230,7 @@ def fight():  # The main function for fights
         8: ["The Chief", 100, 4]
     }
 
-    if level < 9:
+    if level < (NUM_LEVELS + 1):
         monster = levels[level][0]
         monster_health = levels[level][1]
         monster_strength = levels[level][2]
@@ -210,7 +244,6 @@ def fight():  # The main function for fights
     while not fight_over:
         while True:
             print("\nInventory:")
-            # print(*inventory_items, sep=", ")
             print(*[element for element in inventory_items if element in weapon_power or element in healing_power], sep=", ")
             print("\nType an item to attack with or use! Type \"hands\" to attack with your bare hands!")
 
@@ -256,12 +289,12 @@ def fight():  # The main function for fights
 
     else:
         print("\nUh oh... You lost the fight!")
-        health = 3
+        health = FIGHT_LOSS_HEALTH
         time.sleep(1)
         next_action()
 
 
-def exploration():  # Should eventually contain the main storyline, however it currently only runs a fight
+def exploration():  # Main story function
     global level
 
     levels = {
@@ -279,7 +312,7 @@ def exploration():  # Should eventually contain the main storyline, however it c
     time.sleep(1)
     fight()
 
-    if level > 8:
+    if level > NUM_LEVELS:
         fight()
 
 
@@ -293,23 +326,23 @@ def survival():  # Options for item gathering
         if action == "h":
             print("You venture into the woods...")
             time.sleep(1)
-            event = random.randint(0, 9)
-            if event == 5:
+            event = random.randint(0, ODDS_AMBUSH)
+            if event == ODDS_AMBUSH:
                 print("You are ambushed by a monster!")
                 fight()
                 break
             else:
                 event = random.randint(0, 10)
                 if -1 < event < 4:
-                    print("Your hunting efforts weren't fortunate... You found a dead squirrel.")
-                    inventory_items.update({"squirrel meat": "Will give you +2 hunger when consumed!!"})
+                    print("\nYour hunting efforts weren't fortunate... You found a dead squirrel.")
+                    inventory_items.update({"squirrel meat": {"description": "Will give you +2 hunger when consumed!", "count": 1}})
                 elif 3 < event < 8:
-                    print("You manage to ambush a group of ducks")
+                    print("\nYou manage to ambush a group of ducks")
 
-                    inventory_items.update({"duck meat": "Will give you +5 hunger when consumed!"})
+                    inventory_items.update({"duck meat": {"description": "Will give you +5 hunger when consumed!", "count": 1}})
                 else:
-                    print("You took down a deer!")
-                    inventory_items.update({"deer meat": "Fully restores hunger when consumed!"})
+                    print("\nYou took down a deer!")
+                    inventory_items.update({"deer meat": {"description": "Fully restores hunger when consumed!", "count": 1}})
             break
 
         elif action == "g":
@@ -362,55 +395,19 @@ def next_action():  # Main function
             day += 1
             hunger -= 1
             survival()
+
         elif action in inventory_items:
-            print(f"Are you sure you want to use {action}? Y/N")
-            action2 = input("\n> ").lower()
-            if action2 == "y" or "yes":
-
-                if action == "squirrel meat":
-                    print("Consuming squirrel meat...")
+            if action in hunger_power:
+                print(f"Are you sure you want to use {action}? Y/N")
+                action2 = input("\n> ").lower()
+                if action2 == "y" or "yes":
+                    print(f"Consuming {action}...")
                     time.sleep(1)
-                    hunger += 2
-                    del inventory_items["squirrel meat"]
+                    hunger += hunger_power[action]
+                    del inventory_items[action]
                     next_action()
-
-                if action == "duck meat":
-                    print("Consuming duck meat...")
-                    time.sleep(1)
-                    hunger += 5
-                    del inventory_items["duck meat"]
-                    next_action()
-
-                if action == "deer meat":
-                    print("Consuming deer meat...")
-                    time.sleep(1)
-                    hunger += 10
-                    del inventory_items["deer meat"]
-                    next_action()
-
-                if action == "health mix":
-                    print("Consuming health mix...")
-                    time.sleep(1)
-                    health += 10
-                    del inventory_items["health mix"]
-                    next_action()
-
-                if action == "bandage":
-                    print("Using bandage...")
-                    time.sleep(1)
-                    health += 5
-                    del inventory_items["bandage"]
-                    next_action()
-
-                if action == "mre":
-                    print("Consuming MRE...")
-                    time.sleep(1)
-                    hunger += 5
-                    del inventory_items["mre"]
-                    next_action()
-
-                else:
-                    print("Item not found!")
+            else:
+                print("Item not edible!")
         else:
             print("Please select a valid choice!")
 
