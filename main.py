@@ -19,7 +19,7 @@ tools and weapons in order to survive and progress.
 # Gathering when you have every item breaks the game
 # There is no current way to distinguishing how many items you have
 # Can't currently heal in the main menu
-#
+# The difficulty level currently does not do anything
 
 # Import libraries and starting variables
 
@@ -38,7 +38,7 @@ MAX_HUNGER = 10
 MAX_HEALTH = 10
 
 FIGHT_LOSS_HEALTH = 3
-ODDS_AMBUSH = 9
+ODDS_AMBUSH = 50
 
 BANDAGE_HEALING = 5
 HEALTH_MIX_HEALING = 10
