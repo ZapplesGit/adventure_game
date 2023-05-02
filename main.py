@@ -1,4 +1,5 @@
 # Outsider's Odyssey - The Island
+# Aidan Gould-Pretorius
 
 """
 Brief:
@@ -16,10 +17,9 @@ tools and weapons in order to survive and progress.
 """
 
 # CURRENT KNOWN BUGS
-# Gathering when you have every item breaks the game
-# There is no current way to distinguishing how many items you have
-# Can't currently heal in the main menu
 # The difficulty level currently does not do anything
+# Haven't added a max check to hunting yet
+# Haven't added the ability to run yet
 
 # Import libraries and starting variables
 
@@ -27,49 +27,52 @@ import random
 import time
 
 day = 1
-health = 10
-hunger = 5
+health = 0
+hunger = 0
 level = 1
+difficulty = 0
 
 # Constants
+
+MIN_DIFFICULTY = 1
+MAX_DIFFICULTY = 3
 
 NUM_LEVELS = 8
 MAX_HUNGER = 10
 MAX_HEALTH = 10
 
-FIGHT_LOSS_HEALTH = 3
-ODDS_AMBUSH = 50
+FIGHT_LOSS_HEALTH = 3  # How much health you are set to after losing a fight
+ODDS_AMBUSH = 9  # Decrease this number to increase the likelihood of an ambush
 
 BANDAGE_HEALING = 5
 HEALTH_MIX_HEALING = 10
-
 SQUIRREL_MEAT_FOOD = 2
 DUCK_MEAT_FOOD = 5
 DEER_MEAT_FOOD = 10
 MRE_FOOD = 5
 
-# Starting dictionaries and lists
+# Dictionaries and lists
 
-gather_items = {
-    "stick": {"description": "Combine this with a rock to make a hatchet, or with a bone to make a spear!", "count": 1},
-    "rock": {"description": "Found it in the sand... Combine with a stick to make hatchet!", "count": 1},
-    "aloe vera": {"description": "Plenty of it to be found around the island. Combines with Marigold to make a health mix..", "count": 1},
-    "marigold": {"description": "Beautiful orange flower. Keep it as a memento, or combine it with Aloe Vera to make a health mix.", "count": 1},
-    "blade": {"description": "Combine this with a spear to upgrade it.", "count": 1},
-    "bone": {"description": "Combine this with a stick to make a spear!", "count": 1},
-    "vodka": {"description": "Drink up... Or combine with cloth to make a Molotov!", "count": 1},
-    "cloth": {"description": "Combine with Vodka to make a Molotov!", "count": 1},
-    "grenade": {"description": "Will blow up just about anything in a fight. Single use, will deal 50 damage.", "count": 1},
-    "bandage": {"description": "Will give +5 health when used.", "count": 1}
+gather_items = {  # The items which you can possibly gather from my gather function
+    "stick": "Combine this with a rock to make a hatchet, or with a bone to make a spear!",
+    "rock": "Found it in the sand... Combine with a stick to make hatchet!",
+    "aloe vera": "Plenty of it to be found around the island. Combines with Marigold to make a health mix..",
+    "marigold": "Beautiful orange flower. Keep it as a memento, or combine it with Aloe Vera to make a health mix.",
+    "blade": "Combine this with a spear to upgrade it.",
+    "bone": "Combine this with a stick to make a spear!",
+    "vodka": "Drink up... Or combine with cloth to make a Molotov!",
+    "cloth": "Combine with Vodka to make a Molotov!",
+    "grenade": "Will blow up just about anything in a fight. Single use, will deal 50 damage.",
+    "bandage": "Will give +5 health when used."
 }
 
-inventory_items = {
-    "mre": {"description": "Meal Ready to Eat. Should fill you up. Will give +5 hunger when consumed.", "count": 1},
-    "stick": {"description": "Combine this with a rock to make a hatchet, or with a bone to make a spear!", "count": 1},
-    "rock": {"description": "Found it in the sand... Combine with a stick to make hatchet!", "count": 1}
+inventory_items = {  # These are the items you start with, this dictionary will change based on what is in the player's inventory
+    "mre": "Meal Ready to Eat. Should fill you up. Will give +5 hunger when consumed.",
+    "stick": "Combine this with a rock to make a hatchet, or with a bone to make a spear!",
+    "rock": "Found it in the sand... Combine with a stick to make hatchet!"
 }
 
-weapon_power = {
+weapon_power = {  # This is the amount of damage each weapon does
     "hatchet": 10,
     "spear": 15,
     "upgraded spear": 20,
@@ -77,18 +80,41 @@ weapon_power = {
     "grenade": 50
 }
 
-healing_power = {
+healing_power = {  # This is the amount of healing each healing aspect of the game does
     "health mix": 10,
     "bandage": 5
 }
 
-hunger_power = {
+hunger_power = {  # This is the amount of hunger you get back for eating food, can be changed in constants above
     "squirrel meat": SQUIRREL_MEAT_FOOD,
     "duck meat": DUCK_MEAT_FOOD,
     "deer meat": DEER_MEAT_FOOD,
     "mre": MRE_FOOD
 }
 
+levels = {  # Format - Level: ["Name of enemy", Health of enemy, Strength of enemy]
+    1: ["Wolf", 25, 1],
+    2: ["Tribesman", 30, 2],
+    3: ["Bear", 35, 2],
+    4: ["Rival Tribesman", 40, 2],
+    5: ["Rival Tribe Chief", 45, 3],
+    6: ["Giant", 50, 3],
+    7: ["Tribe Henchman", 55, 4],
+    8: ["The Chief", 100, 4]
+}
+
+level_text = {  # The game's storyline is kept in this dictionary, on a level-by-level basis.
+    1: "\nDisoriented, you pace away from the beach and into the woods.\nYou hear distant noises, and are suddenly ambushed by a wolf!\nIf you kill the wolf, you may have a meal for tonight, if you run, you may go hungry.\n",
+    2: "\nAfter that encounter with the wolf, you're shaken, but you continue into the woods.\nYou stumble upon a native tribe who lives on the island.\nThey attack! Fend the tribesman off!\n",
+    3: "\nAfter that encounter with the tribe, you're shaken, but you continue into the woods.\nYou encounter the tribe again, but it seems that you have gained their respect\nThey tell you they will help you off this island, but you must prove yourself by killing a bear.\n",
+    4: "\nYou've gained the trust of the tribe, but you hear a sound in the distance.\nIt's another rival tribe! They seek to kill you and your allies!\nFend them off!\n",
+    5: "\nThe rival tribe is back!\nAfter seeing your skill in battle, the Chief of the tribe wishes to battle!\nYou are cornered! Defeat the rival Chief!\n",
+    6: "\nWith the rival chief defeated, your tribe rules over the island!\nYou hear a noise while you're out collecting firewood...\nIt's a giant! Defeat it, before it destroys the tribe!\n",
+    7: "\nYou think you can rest easy now that the giant is defeated...\nWhile you're resting, you hear the chief of your tribe plotting to kill you!\nYou act fast, and attack his henchmen!\n",
+    8: "\nYou have defeated his henchman, but the Chief is angry...\nHe charges at you... Defeat him to escape The Island!\n"
+}
+
+# The types of monsters that can randomly appear in an ambush
 monster_types = ["Zombie", "Orc", "Goblin", "Dragon", "Troll", "Giant"]
 
 # (for testing)
@@ -96,19 +122,24 @@ monster_types = ["Zombie", "Orc", "Goblin", "Dragon", "Troll", "Giant"]
 
 
 def start_game():  # Choose difficulty function - difficulty not yet implemented
+    global health
+    global hunger
+    global difficulty
     print("\nWelcome to Outsider's Odyssey - The Island")
-    print("Please select a difficulty level of 1-3")
+    print(f"Please enter a difficulty between {MIN_DIFFICULTY}-{MAX_DIFFICULTY}")
     while True:
         try:
             difficulty = int(input("\n> "))
-            if 0 < difficulty < 4:
+            if MIN_DIFFICULTY-1 < difficulty < MAX_DIFFICULTY+1:
                 break
             else:
-                print("Please enter a difficulty between 1-3!")
+                print(f"Please enter a difficulty between {MIN_DIFFICULTY}-{MAX_DIFFICULTY}!")
         except ValueError:
             print("Please enter an integer!")
     print(f"Proceeding with difficulty {difficulty}!")
     print("You wake up in a foreign land...")
+    health = (4-difficulty)*3
+    hunger = (4-difficulty)*3
     time.sleep(1)
     next_action()
 
@@ -140,10 +171,6 @@ def inventory():  # Displays items in inventory
         print("\n"+health_bar)
         print(hunger_bar)
         print(*inventory_items, sep=", ")
-
-        for item in inventory_items:
-            print(f"{item}: {inventory_items[item]['count']}")
-
         print("Type an item to learn more. To use an item, type X to exit.")
         action = input("\n> ").lower()
         if action == "x":
@@ -212,30 +239,18 @@ def crafting():  # Uses the combinable function to add new item in inventory fro
     next_action()
 
 
-def fight():  # The main function for fights
+def fight(ambush):  # The main function for fights
     global health
     global level
+    fight_over = False
     monster = monster_types[random.randint(0, 5)]
-    monster_health = random.randint(20, 50)
-    monster_strength = random.randint(2, 4)
+    monster_health = random.randint(20, 40)
+    monster_strength = random.randint(2, 3)
 
-    levels = {
-        1: ["Wolf", 25, 1],
-        2: ["Tribesman", 30, 2],
-        3: ["Bear", 35, 2],
-        4: ["Rival Tribesman", 40, 2],
-        5: ["Rival Tribe Chief", 45, 3],
-        6: ["Giant", 50, 3],
-        7: ["Tribe Henchman", 55, 4],
-        8: ["The Chief", 100, 4]
-    }
-
-    if level < (NUM_LEVELS + 1):
+    if not ambush:
         monster = levels[level][0]
         monster_health = levels[level][1]
         monster_strength = levels[level][2]
-
-    fight_over = False
 
     print(get_health())
     print(f"You're fighting a {monster}!")
@@ -248,7 +263,6 @@ def fight():  # The main function for fights
             print("\nType an item to attack with or use! Type \"hands\" to attack with your bare hands!")
 
             action = input("\n> ")
-
             if action == "hands":
                 attacking_power = 5
                 break
@@ -297,64 +311,72 @@ def fight():  # The main function for fights
 def exploration():  # Main story function
     global level
 
-    levels = {
-        1: "\nDisoriented, you pace away from the beach and into the woods.\nYou hear distant noises, and are suddenly ambushed by a wolf!\nIf you kill the wolf, you may have a meal for tonight, if you run, you may go hungry.\n",
-        2: "\nAfter that encounter with the wolf, you're shaken, but you continue into the woods.\nYou stumble upon a native tribe who lives on the island.\nThey attack! Fend the tribesman off!\n",
-        3: "\nAfter that encounter with the tribe, you're shaken, but you continue into the woods.\nYou encounter the tribe again, but it seems that you have gained their respect\nThey tell you they will help you off this island, but you must prove yourself by killing a bear.\n",
-        4: "\nYou've gained the trust of the tribe, but you hear a sound in the distance.\nIt's another rival tribe! They seek to kill you and your allies\nFend them off!\n",
-        5: "\nThe rival tribe is back!\nAfter seeing your skill in battle, the Chief of the tribe wishes to battle!\nYou are cornered! Defeat the rival Chief!\n",
-        6: "\nWith the rival chief defeated, your tribe rules over the island!\nYou hear a noise while you're out collecting firewood...\nIt's a giant! Defeat it, before it destroys the tribe!\n",
-        7: "\nYou think you can rest easy now that the giant is defeated...\nWhile you're resting, you hear the chief of your tribe plotting to kill you!\nYou act fast, and attack his henchmen!\n",
-        8: "\nYou have defeated his henchman, but the Chief is angry...\nHe charges at you... Defeat him to escape The Island!\n"
-    }
-
-    print(levels[level])
+    print(level_text[level])
     time.sleep(1)
-    fight()
+    fight(False)
 
     if level > NUM_LEVELS:
-        fight()
+        fight(True)
 
 
 def survival():  # Options for item gathering
+    global day
+    global hunger
     print("You contemplate your options...")
     print("H - Hunting \nG - Gathering")
-    # print("Type X to exit.")
+    print("Type X to exit.")
 
     while True:
-        action = input("\n> ")
-        if action == "h":
+        action = input("\n> ").lower()
+        if action == "h" or action == "hunt":
+            day += 1
+            hunger -= 1
             print("You venture into the woods...")
             time.sleep(1)
             event = random.randint(0, ODDS_AMBUSH)
             if event == ODDS_AMBUSH:
                 print("You are ambushed by a monster!")
-                fight()
+                time.sleep(1)
+                fight(True)
                 break
             else:
                 event = random.randint(0, 10)
                 if -1 < event < 4:
                     print("\nYour hunting efforts weren't fortunate... You found a dead squirrel.")
-                    inventory_items.update({"squirrel meat": {"description": "Will give you +2 hunger when consumed!", "count": 1}})
+                    inventory_items.update({"squirrel meat": "Will give you +2 hunger when consumed!"})
                 elif 3 < event < 8:
-                    print("\nYou manage to ambush a group of ducks")
-
-                    inventory_items.update({"duck meat": {"description": "Will give you +5 hunger when consumed!", "count": 1}})
+                    print("\nYou manage to ambush a group of ducks!")
+                    inventory_items.update({"duck meat": "Will give you +5 hunger when consumed!"})
                 else:
                     print("\nYou took down a deer!")
-                    inventory_items.update({"deer meat": {"description": "Fully restores hunger when consumed!", "count": 1}})
+                    inventory_items.update({"deer meat": "Fully restores hunger when consumed!"})
+            time.sleep(1)
             break
 
-        elif action == "g":
+        elif action == "g" or action == "gather":
+            day += 1
+            hunger -= 1
             print("You venture into the woods...")
             time.sleep(1)
             while True:
                 event = random.randint(0, 9)
-                if list(gather_items)[event] not in inventory_items:
-                    inventory_items.update({list(gather_items)[event]: gather_items.get(list(gather_items)[event])})
-                    print(f"You found a {list(inventory_items)[-1]}!")
-                    time.sleep(1)
+
+#  Here I used .issubset and turned the dictionaries into sets to check if all the items in gather_items are in the user's inventory. Without this
+#  check, the code simply tries to search for an item they don't already have forever.
+
+                if not set(gather_items).issubset(set(inventory_items)):
+                    if list(gather_items)[event] not in inventory_items:
+                        inventory_items.update({list(gather_items)[event]: gather_items.get(list(gather_items)[event])})
+                        print(f"You found a {list(inventory_items)[-1]}!")
+                        time.sleep(1)
+                        break
+                else:
+                    print("Uh oh! It looks like your pockets are full!")
+                    day -= 1
+                    hunger += 1
                     break
+            break
+        elif action == "x" or action == "exit":
             break
         else:
             print("Please enter a valid choice!")
@@ -372,13 +394,13 @@ def next_action():  # Main function
         quit()
     if hunger <= 4:
         print("\nYou're getting hungry...")
-    print(f"\nDay {day}")
-    print(health_bar)
-    print(hunger_bar)
-    print("I - Inventory \nC - Crafting \nE - Exploration \nS - Survival")
-    print("Or, type an item to use it!")
 
     while True:
+        print(f"\nDay {day}")
+        print(health_bar)
+        print(hunger_bar)
+        print("I - Inventory \nC - Crafting \nE - Exploration \nS - Survival")
+        print("Or, type an item to use it!")
         action = str(input("\n> ").lower())
         if action == "i" or action == "inventory":
             inventory()
@@ -392,20 +414,28 @@ def next_action():  # Main function
             exploration()
             break
         elif action == "s" or action == "survival" or action == "survive":
-            day += 1
-            hunger -= 1
             survival()
 
         elif action in inventory_items:
-            if action in hunger_power:
+            if action in hunger_power or action in healing_power:
                 print(f"Are you sure you want to use {action}? Y/N")
-                action2 = input("\n> ").lower()
-                if action2 == "y" or "yes":
-                    print(f"Consuming {action}...")
-                    time.sleep(1)
-                    hunger += hunger_power[action]
-                    del inventory_items[action]
-                    next_action()
+                while True:
+                    action2 = input("\n> ").lower()
+                    if action2 == "y" or action2 == "yes":
+                        print(f"Consuming {action}...")
+                        time.sleep(1)
+                        if action in hunger_power:
+                            hunger += hunger_power[action]
+                        else:
+                            health += healing_power[action]
+                        del inventory_items[action]
+                        next_action()
+                        break
+                    elif action2 == "n" or action2 == "no":
+                        print(f"You decided against using {action}!")
+                        break
+                    else:
+                        print("Please select Y or N!")
             else:
                 print("Item not edible!")
         else:
