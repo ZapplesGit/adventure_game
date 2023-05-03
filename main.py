@@ -92,6 +92,14 @@ hunger_power = {  # This is the amount of hunger you get back for eating food, c
     "mre": MRE_FOOD
 }
 
+combinations = {  # The possible crafting combinations
+    ("rock", "stick"): {"result": "hatchet", "description": "Could hit some bad guys with this..."},
+    ("aloe vera", "marigold"): {"result": "health mix", "description": "Max out your health with this!"},
+    ("stick", "bone"): {"result": "spear", "description": "Could stab some bad guys with this... Will deal 15 damage."},
+    ("spear", "blade"): {"result": "upgraded spear", "description": "Could seriously stab some bad guys with this... Will deal 20 damage."},
+    ("cloth", "vodka"): {"result": "molotov", "description": "Could burn up some bad guys with this... Single use, will deal 35 damage."}
+}
+
 levels = {  # Format - Level: ["Name of enemy", Health of enemy, Strength of enemy]
     1: ["Wolf", 25, 1],
     2: ["Tribesman", 30, 2],
@@ -118,7 +126,7 @@ level_text = {  # The game's storyline is kept in this dictionary, on a level-by
 monster_types = ["Zombie", "Orc", "Goblin", "Dragon", "Troll", "Giant"]
 
 # (for testing)
-# inventory_items = gather_items
+# inventory_items.update(gather_items)
 
 
 def start_game():  # Choose difficulty function - difficulty not yet implemented
@@ -137,7 +145,8 @@ def start_game():  # Choose difficulty function - difficulty not yet implemented
         except ValueError:
             print("Please enter an integer!")
     print(f"Proceeding with difficulty {difficulty}!")
-    print("You wake up in a foreign land...")
+    print("\nYou wake up in a foreign land...\nHunt for food or gather resources to craft weapons, or go exploring"
+          " to uncover the mysteries of The Island...")
     health = (4-difficulty)*3
     hunger = (4-difficulty)*3
     time.sleep(1)
@@ -186,14 +195,6 @@ def inventory():  # Displays items in inventory
 
 def combinable_items(craft1, craft2):  # Checks if items are combinable / craft-able
 
-    combinations = {
-        ("rock", "stick"): {"result": "hatchet", "description": "Could hit some bad guys with this..."},
-        ("aloe vera", "marigold"): {"result": "health mix", "description": "Max out your health with this!"},
-        ("stick", "bone"): {"result": "spear", "description": "Could stab some bad guys with this... Will deal 15 damage."},
-        ("spear", "blade"): {"result": "upgraded spear", "description": "Could seriously stab some bad guys with this... Will deal 20 damage."},
-        ("cloth", "vodka"): {"result": "molotov", "description": "Could burn up some bad guys with this... Single use, will deal 35 damage."}
-    }
-
     if (craft1, craft2) in combinations or (craft2, craft1) in combinations:
         check = True
         outcome = combinations.get((craft1, craft2)) or combinations.get((craft2, craft1))
@@ -202,7 +203,6 @@ def combinable_items(craft1, craft2):  # Checks if items are combinable / craft-
         del inventory_items[craft2]
     else:
         check = False
-
     return check
 
 
@@ -243,6 +243,7 @@ def fight(ambush):  # The main function for fights
     global health
     global level
     fight_over = False
+    attacking_power = 0
     monster = monster_types[random.randint(0, 5)]
     monster_health = random.randint(20, 40)
     monster_strength = random.randint(2, 3)
@@ -260,13 +261,18 @@ def fight(ambush):  # The main function for fights
         while True:
             print("\nInventory:")
             print(*[element for element in inventory_items if element in weapon_power or element in healing_power], sep=", ")
-            print("\nType an item to attack with or use! Type \"hands\" to attack with your bare hands!")
-
+            print("\nType an item to attack with or use! Type \"hands\" to attack with your bare hands!"
+                  " Type \"run\" to run away!")
             action = input("\n> ")
-            if action == "hands":
+            if action == "run":
+                print("You ran away!")
+                fight_over = True
+                next_action()
+                break
+            elif action == "hands":
                 attacking_power = 5
                 break
-            if action in inventory_items:
+            elif action in inventory_items:
                 if action in ["grenade", "molotov", "bandage", "health mix"]:
                     del inventory_items[action]
                 if action in healing_power:
@@ -299,6 +305,14 @@ def fight(ambush):  # The main function for fights
         print("\nYou won the fight!")
         level += 1
         time.sleep(1)
+
+        if level > NUM_LEVELS:
+            print("The Chief falls, and you know that you are finally free. With nothing to stop you, you devote")
+            print("the next few weeks to building a boat and escaping. Eventually, you cobble together the resources.")
+            print("You set sail, with no clue as to what lies in your future...")
+            time.sleep(5)
+            quit()
+
         next_action()
 
     else:
@@ -314,9 +328,6 @@ def exploration():  # Main story function
     print(level_text[level])
     time.sleep(1)
     fight(False)
-
-    if level > NUM_LEVELS:
-        fight(True)
 
 
 def survival():  # Options for item gathering
@@ -340,16 +351,22 @@ def survival():  # Options for item gathering
                 fight(True)
                 break
             else:
-                event = random.randint(0, 10)
-                if -1 < event < 4:
-                    print("\nYour hunting efforts weren't fortunate... You found a dead squirrel.")
-                    inventory_items.update({"squirrel meat": "Will give you +2 hunger when consumed!"})
-                elif 3 < event < 8:
-                    print("\nYou manage to ambush a group of ducks!")
-                    inventory_items.update({"duck meat": "Will give you +5 hunger when consumed!"})
+                if not {"squirrel meat", "duck meat", "deer meat"}.issubset(set(inventory_items)):
+                    event = random.randint(0, 2)
+                    if event == 0 and "squirrel meat" not in inventory_items:
+                        print("\nYour hunting efforts weren't fortunate... You found a dead squirrel.")
+                        inventory_items.update({"squirrel meat": "Will give you +2 hunger when consumed!"})
+                    elif event == 1 and "duck meat" not in inventory_items:
+                        print("\nYou manage to ambush a group of ducks!")
+                        inventory_items.update({"duck meat": "Will give you +5 hunger when consumed!"})
+                    else:
+                        print("\nYou took down a deer!")
+                        inventory_items.update({"deer meat": "Fully restores hunger when consumed!"})
                 else:
-                    print("\nYou took down a deer!")
-                    inventory_items.update({"deer meat": "Fully restores hunger when consumed!"})
+                    print("Uh oh! It looks like your pockets are full!")
+                    day -= 1
+                    hunger += 1
+                    break
             time.sleep(1)
             break
 
