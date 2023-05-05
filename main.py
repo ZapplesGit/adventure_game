@@ -16,11 +16,6 @@ Additionally, the player must contend with the limited resources available on th
 tools and weapons in order to survive and progress.
 """
 
-# CURRENT KNOWN BUGS
-# The difficulty level currently does not do anything
-# Haven't added a max check to hunting yet
-# Haven't added the ability to run yet
-
 # Import libraries and starting variables
 
 import random
@@ -66,7 +61,7 @@ gather_items = {  # The items which you can possibly gather from my gather funct
     "bandage": "Will give +5 health when used."
 }
 
-inventory_items = {  # These are the items you start with, this dictionary will change based on what is in the player's inventory
+inventory_items = {  # These are the items you start with, this dictionary will change throughout the game
     "mre": "Meal Ready to Eat. Should fill you up. Will give +5 hunger when consumed.",
     "stick": "Combine this with a rock to make a hatchet, or with a bone to make a spear!",
     "rock": "Found it in the sand... Combine with a stick to make hatchet!"
@@ -322,7 +317,8 @@ def fight(ambush):  # The main function for fights
         next_action()
 
 
-def exploration():  # Main story function
+def exploration():  # Main story function. This function has become very small after moving my
+    # Main story text into a dictionary at the beginning of the program.
     global level
 
     print(level_text[level])
@@ -330,7 +326,7 @@ def exploration():  # Main story function
     fight(False)
 
 
-def survival():  # Options for item gathering
+def survival():  # Options for item gathering and hunting
     global day
     global hunger
     print("You contemplate your options...")
@@ -378,8 +374,8 @@ def survival():  # Options for item gathering
             while True:
                 event = random.randint(0, 9)
 
-#  Here I used .issubset and turned the dictionaries into sets to check if all the items in gather_items are in the user's inventory. Without this
-#  check, the code simply tries to search for an item they don't already have forever.
+                # Used .issubset and turned the dictionaries into sets to
+                # check if all the items in gather_items are in inventory_items
 
                 if not set(gather_items).issubset(set(inventory_items)):
                     if list(gather_items)[event] not in inventory_items:
@@ -400,7 +396,7 @@ def survival():  # Options for item gathering
     next_action()
 
 
-def next_action():  # Main function
+def next_action():  # Main function, home screen
     global day
     global hunger
     global health
@@ -408,7 +404,12 @@ def next_action():  # Main function
     hunger_bar = get_hunger()
     if hunger <= 0:
         print("\nYou starved to death!")
-        quit()
+        print("Press Y to replay the game.")
+        answer = str(input("\n> ").lower())
+        if answer == "y":
+            start_game()
+        else:
+            quit()
     if hunger <= 4:
         print("\nYou're getting hungry...")
 
@@ -433,7 +434,7 @@ def next_action():  # Main function
         elif action == "s" or action == "survival" or action == "survive":
             survival()
 
-        elif action in inventory_items:
+        elif action in inventory_items:  # This checks if the input is an item that can be used
             if action in hunger_power or action in healing_power:
                 print(f"Are you sure you want to use {action}? Y/N")
                 while True:
@@ -459,4 +460,4 @@ def next_action():  # Main function
             print("Please select a valid choice!")
 
 
-start_game()
+start_game()  # Starts the game
